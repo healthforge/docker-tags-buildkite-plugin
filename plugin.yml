@@ -1,0 +1,15 @@
+name: Package
+description: Docker build, tag and push plugin for buildkite
+author: https://github.com/healthforge
+requirements:
+  - bash
+  - git
+configuration:
+  properties:
+    registry:
+      type: string
+    tag:
+      type: string
+  required:
+    - registry
+    - tag
