@@ -16,9 +16,9 @@ Adds the following tags to container:
   command:
   - docker build -t ${REPOSITORY_URI}:${BUILDKITE_BUILD_ID} .
   plugins:
-    healthforge/docker-tags:
-      registry: "${REPOSITORY_URI}"
-      tag: "${BUILDKITE_BUILD_ID}"
+    - healthforge/docker-tags:
+        registry: "${REPOSITORY_URI}"
+        tag: "${BUILDKITE_BUILD_ID}"
 ```
 
 ## Options
