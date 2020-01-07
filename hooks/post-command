@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BRANCH=${BUILDKITE_BRANCH//\//_}
+# Tag safe chars
+BRANCH=${BUILDKITE_BRANCH//[^a-zA-Z0-9\.-]/_}
 git fetch --tags
 DESCRIBE=$(git describe --always)
 for TAG in latest $BUILDKITE_BUILD_NUMBER $BUILDKITE_COMMIT $BRANCH $DESCRIBE; do
