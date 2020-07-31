@@ -6,10 +6,16 @@ requirements:
   - git
 configuration:
   properties:
-    registry:
+    registries:
+      type: array
+      items:
+        type: string
+    src:
       type: string
-    tag:
-      type: string
+    tags:
+      type: array
+      items:
+        type: string
   required:
-    - registry
-    - tag
+    - registries
+    - src

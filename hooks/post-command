@@ -1,11 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tag safe chars
-BRANCH=${BUILDKITE_BRANCH//[^a-zA-Z0-9\.-]/_}
-git fetch --tags
-DESCRIBE=$(git describe --always)
-for TAG in latest $BUILDKITE_BUILD_NUMBER $BUILDKITE_COMMIT $BRANCH $DESCRIBE; do
-  docker tag ${BUILDKITE_PLUGIN_DOCKER_TAGS_REGISTRY}:${BUILDKITE_PLUGIN_DOCKER_TAGS_TAG} ${BUILDKITE_PLUGIN_DOCKER_TAGS_REGISTRY}:${TAG}
-  docker push ${BUILDKITE_PLUGIN_DOCKER_TAGS_REGISTRY}:${TAG}
-done
+tags=""
+
+# Mutable deployment tag
+BRANCH=${BUILDKITE_BRANCH//[^a-zA-Z0-9\.-]/-}
+tags+="latest-${BRANCH} "
+
+# Immutable branch tag
+tags+="branch-${BRANCH}-${BUILDKITE_JOB_ID:0:7} "
+
+tags+="build-${BUILDKITE_BUILD_NUMBER} "
+tags+="commit-${BUILDKITE_COMMIT:0:7} "
+
+# Get additional tags
+while IFS='=' read -r name _ ; do
+  if [[ $name =~ ^(BUILDKITE_PLUGIN_DOCKER_TAGS_TAGS_[0-9]+) ]] ; then
+    echo "Adding tag ${!name}"
+    tags+="${!name} "
+  fi
+done < <(env | sort)
+
+registries=""
+src="$BUILDKITE_PLUGIN_DOCKER_TAGS_SRC"
+
+# Registries
+while IFS='=' read -r name _ ; do
+  if [[ $name =~ ^(BUILDKITE_PLUGIN_DOCKER_TAGS_REGISTRIES_[0-9]+) ]] ; then
+    echo "Adding registry ${!name}"
+    registries+="${!name} "
+  fi
+done < <(env | sort)
+
+if [[ -n "${registries}" ]] ; then
+  for registry in $registries; do
+    for tag in $tags; do
+      echo "Tagging $registry:$tag"
+      docker tag ${src} ${registry}:${tag}
+      docker push ${registry}:${tag}
+    done
+  done
+else
+  echo "No registries defined"
+  exit 1
+fi

@@ -4,29 +4,36 @@ A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) to tag and pus
 
 Adds the following tags to container:
 
-* Git commit e.g. `d453423b225bb5f32234d17771e8ff74f888a7cc`
-* Git branch e.g. `feature_foo`
-* Git describe e.g. `v1.0.0-6-g2681315`
-* Buildkite build number e.g. `199`
+* Git branch e.g. `branch-feature-foo`
+* Unique git branch for lifecycle management e.g. `branch-feature-foo-bb5f3223`
+* Buildkite build number e.g. `build-199`
+* Git commit e.g. `commit-d453423`
 
 ## Example
 
 ```yml
 - label: ':docker: Package'
   command:
-  - docker build -t ${REPOSITORY_URI}:${BUILDKITE_BUILD_ID} .
+  - docker build -t foo .
   plugins:
     - healthforge/docker-tags:
-        registry: "${REPOSITORY_URI}"
-        tag: "${BUILDKITE_BUILD_ID}"
+        registries:
+          - "${REPOSITORY_URI}"
+        src: foo
+        tags:
+          - latest
 ```
 
 ## Options
 
-### `registry`
+### `registries`
 
-URL of docker registry.
+Array of docker registry URLs.
 
-### `tag`
+### `tags`
 
-Tag for build that you want to push.
+Array of additional tags to push.
+
+### `src`
+
+Docker tag for build that you want to push (must be qualified).
