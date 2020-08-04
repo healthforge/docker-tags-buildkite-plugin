@@ -3,9 +3,12 @@ set -euo pipefail
 
 tags=""
 
-# Mutable deployment tag
 BRANCH=${BUILDKITE_BRANCH//[^a-zA-Z0-9\.-]/-}
-tags+="latest-${BRANCH} "
+
+if [[ ${BUILDKITE_PLUGIN_DOCKER_TAGS_LATEST:-true} == "true" ]] ; then
+  # Mutable deployment tag
+  tags+="latest-${BRANCH} "
+fi
 
 # Immutable branch tag
 tags+="branch-${BRANCH}-${BUILDKITE_JOB_ID:0:7} "
